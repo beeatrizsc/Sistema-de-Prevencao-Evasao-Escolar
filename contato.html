@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Contato | Alerta Precoce</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="d-flex flex-column min-vh-100 bg-suave">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand font-weight-bold d-flex align-items-center" href="index.html">
+        <img src="logo1.png" alt="Logo Alerta Precoce" class="img-logo-nav mr-2">
+        <span class="text-azul-edtech">Alerta Precoce</span>
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuNavegacao">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="menuNavegacao">
+        <ul class="navbar-nav ml-auto align-items-lg-center">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Início</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="quem-somos.html">Quem Somos</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="contato.html">Contato</a>
+          </li>
+          <li class="nav-item ml-lg-3 mt-2 mt-lg-0">
+            <a class="btn btn-pill btn-primario-ods" href="login.html">Acessar Sistema</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="py-5 my-auto">
+    <div class="container py-3">
+      <div class="row justify-content-between align-items-start">
+        
+        <!-- Lado Esquerdo: Informações Institucionais -->
+        <div class="col-lg-5 mb-5 mb-lg-0 pr-lg-4">
+          <span class="tag-destaque">Fale Conosco</span>
+          <h1 class="font-weight-bold mb-3">Leve o Alerta Precoce para a sua escola.</h1>
+          <p class="text-secondary mb-4">
+            Tem dúvidas sobre como funciona o cálculo do Score de Risco, deseja cadastrar uma instituição de ensino ou quer saber mais sobre o projeto? Envie uma mensagem para nossa equipe.
+          </p>
+
+          <div class="mb-4">
+            <h6 class="font-weight-bold text-azul-edtech mb-1">Instituição de Origem</h6>
+            <p class="small text-secondary mb-0">Universidade Federal Fluminense (UFF) — Rio das Ostras, RJ</p>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="font-weight-bold text-azul-edtech mb-1">E-mail de Suporte</h6>
+            <p class="small text-secondary mb-0">suporte@alertaprecoce.edu.br</p>
+          </div>
+
+          <div>
+            <h6 class="font-weight-bold text-azul-edtech mb-1">Horário de Atendimento</h6>
+            <p class="small text-secondary mb-0">Segunda a Sexta, das 08h às 18h</p>
+          </div>
+        </div>
+
+        <!-- Lado Direito: Card com Formulário -->
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm p-4 p-md-5" style="border-radius: 20px;">
+            <h4 class="font-weight-bold text-azul-edtech mb-4">Envie sua mensagem</h4>
+            
+            <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Mensagem enviada com sucesso! (Simulação)'); this.reset();">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="nome" class="small font-weight-bold text-secondary">Seu Nome</label>
+                  <input type="text" class="form-control" id="nome" placeholder="Ex: Ana Paula" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="email" class="small font-weight-bold text-secondary">E-mail Institucional</label>
+                  <input type="email" class="form-control" id="email" placeholder="ana@escola.edu.br" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="escola" class="small font-weight-bold text-secondary">Nome da Escola / Secretaria (Opcional)</label>
+                <input type="text" class="form-control" id="escola" placeholder="Ex: Colégio Estadual..." >
+              </div>
+
+              <div class="form-group">
+                <label for="assunto" class="small font-weight-bold text-secondary">Assunto</label>
+                <select class="form-control" id="assunto" required>
+                  <option value="" selected disabled>Selecione o motivo do contato...</option>
+                  <option value="cadastro">Solicitar cadastro de escola</option>
+                  <option value="duvida">Dúvidas sobre o sistema</option>
+                  <option value="sugestao">Feedback ou sugestão acadêmica</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="mensagem" class="small font-weight-bold text-secondary">Mensagem</label>
+                <textarea class="form-control" id="mensagem" rows="4" placeholder="Como podemos ajudar?" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-pill btn-primario-ods btn-block mt-4">
+                Enviar Mensagem
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="bg-azul-edtech text-white py-4 mt-auto">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
+      <div class="mb-2 mb-md-0">
+        <strong>Alerta Precoce</strong> &mdash; Sistema de Prevenção à Evasão Escolar
+      </div>
+      <small class="text-white-50">Projeto Acadêmico UFF &bull; 2026</small>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
