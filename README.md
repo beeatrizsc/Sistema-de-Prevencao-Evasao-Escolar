@@ -27,6 +27,7 @@ Este projeto foi desenvolvido como avaliação prática da disciplina de Desenvo
 
 ---
 ---
+# Early Warning - School Dropout Prevention System
 
 ## English (EN)
 
