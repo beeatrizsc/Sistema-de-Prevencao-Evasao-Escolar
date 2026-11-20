@@ -1,0 +1,127 @@
+/* Importando fontes modernas usadas por grandes plataformas educacionais */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: #334155;
+  background-color: #ffffff;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+/* Paleta Refinada (Mais suave e contemporânea) */
+.bg-azul-edtech { background-color: #162d4c !important; }
+.text-azul-edtech { color: #162d4c !important; }
+.text-vermelho-ods { color: #c5192d !important; }
+.bg-suave { background-color: #f8fafc !important; }
+
+/* Navbar limpa */
+.navbar {
+  padding: 1rem 0;
+  background-color: #162d4c !important;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: #ffffff;
+  font-weight: 500;
+  margin: 0 8px;
+  transition: color 0.2s;
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-nav .active > .nav-link {
+  color: #c5192d;
+}
+
+.img-logo-nav {
+  height: 36px;
+  width: auto;
+}
+
+/* Botões estilo pílula (marca registrada de sites como SAS e AZ) */
+.btn-pill {
+  border-radius: 50px;
+  padding: 10px 26px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+}
+
+.btn-primario-ods {
+  background-color: #c5192d;
+  color: #ffffff;
+  border: 2px solid #c5192d;
+}
+
+.btn-primario-ods:hover {
+  background-color: #a31324;
+  border-color: #a31324;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(197, 25, 45, 0.25);
+}
+
+.btn-secundario-ods {
+  background-color: transparent;
+  color: #162d4c;
+  border: 2px solid #cbd5e1;
+}
+
+.btn-secundario-ods:hover {
+  border-color: #162d4c;
+  background-color: #f8fafc;
+  color: #162d4c;
+}
+
+/* Hero Section clara e espaçada */
+.hero-edtech {
+  padding: 140px 0 90px 0;
+  background: radial-gradient(circle at top right, #fff1f2 0%, #ffffff 45%);
+}
+
+.tag-destaque {
+  display: inline-block;
+  background-color: #ffe4e6;
+  color: #c5192d;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+}
+
+/* Cards de Estatísticas minimalistas (sem bordas grossas) */
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 28px 24px;
+  height: 100%;
+  transition: all 0.25s ease;
+}
+
+.stat-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.08);
+  transform: translateY(-3px);
+}
+
+.stat-numero {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+/* Fotos com cantos arredondados modernos */
+.img-edtech {
+  border-radius: 20px;
+  box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.12);
+}
