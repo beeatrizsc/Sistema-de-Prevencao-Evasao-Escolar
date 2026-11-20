@@ -1,6 +1,6 @@
 # Alerta Precoce — Sistema de Prevenção à Evasão Escolar
 
-*Read this in [English](#-early-warning--school-dropout-prevention-system).*
+*Read this in [English](#-early-warning---school-dropout-prevention-system).*
 
 ---
 
