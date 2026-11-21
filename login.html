@@ -29,7 +29,7 @@
           </div>
           <!-- formulário de login -->
           <div class="card-body p-4">
-            <form action="#" method="POST">
+            <form onsubmit="fazerLogin(event)">
               <div class="form-group">
                 <label for="email" class="font-weight-bold text-azul-ods">E-mail ou Usuário</label>
                 <input type="email" class="form-control" id="email" placeholder="seu.email@escola.edu.br" required>
@@ -54,6 +54,14 @@
                 Entrar no Painel
               </button>
             </form>
+            <script>
+            function fazerLogin(e) {
+              e.preventDefault();
+              const perfil = document.getElementById('perfil').value;
+              localStorage.setItem('perfilUsuario', perfil);
+              window.location.href = 'dashboard.html';
+            }
+</script>
           </div>
 
           <div class="card-footer text-center bg-white border-0 pb-3">

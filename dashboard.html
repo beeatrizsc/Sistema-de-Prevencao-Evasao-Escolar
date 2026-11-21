@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Painel de Controle | Alerta Precoce</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar-edtech">
+      <div class="sidebar-brand d-flex align-items-center">
+        <img src="logo1.png" alt="Logo" class="img-logo-nav mr-2">
+        <div>
+          <span class="font-weight-bold d-block text-white" style="line-height: 1.1;">Alerta Precoce</span>
+          <small class="text-white-50" style="font-size: 0.75rem;">Gestão Preventiva</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <small class="text-uppercase text-white-50 px-3 mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Navegação</small>
+        <a href="#" class="sidebar-link active" id="nav-estudantes" onclick="trocarAba('estudantes', this)">
+          Estudantes & Risco
+        </a>
+        <a href="#" class="sidebar-link" id="nav-acoes" onclick="trocarAba('acoes', this)">
+          Ações Preventivas <span class="badge badge-light ml-auto text-dark" id="contadorAcoesBadge">0</span>
+        </a>
+        <a href="#" class="sidebar-link" id="nav-diario" onclick="trocarAba('diario', this)">
+          Frequência & Notas
+        </a>
+
+        <div id="menuCadastrosRapidos">
+          <small class="text-uppercase text-white-50 px-3 mt-4 mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.05em;">Cadastros (CRUD)</small>
+          <a href="#" class="sidebar-link perm-gestor" data-toggle="modal" data-target="#modalNovoAluno">
+            + Aluno e Responsável
+          </a>
+          <a href="#" class="sidebar-link perm-intervencao" data-toggle="modal" data-target="#modalNovaAcao">
+            + Nova Ação Preventiva
+          </a>
+        </div>
+      </nav>
+
+      <div class="p-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
+        <div class="small text-white-50 mb-1">Perfil ativo:</div>
+        <select id="seletorPerfilRapido" class="form-control form-control-sm mb-3 bg-dark text-white border-secondary" onchange="alterarPerfil(this.value)">
+          <option value="gestor">Gestor Escolar (role_gestor)</option>
+          <option value="assistente">Assistente Social (role_assistente)</option>
+          <option value="professor">Professor (role_professor)</option>
+        </select>
+        <a href="index.html" class="btn btn-sm btn-outline-light btn-block rounded-pill">Sair do Sistema</a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="dashboard-main">
+      
+      <!-- TOPBAR -->
+      <header class="topbar-edtech d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+          <h5 class="font-weight-bold mb-0" id="tituloPagina">Monitoramento de Estudantes</h5>
+          <small class="text-muted">Instituição vinculada ao usuário logado (via PHP/MySQL)</small>
+        </div>
+
+        <div class="d-flex align-items-center mt-2 mt-md-0">
+          <!-- Botão para testar estado vazio vs dados de exemplo -->
+          <button class="btn btn-sm btn-outline-secondary rounded-pill mr-2" id="btnToggleDados" onclick="alternarEstadoDados()">
+            Simular Banco Vazio
+          </button>
+          <button class="btn btn-pill btn-primario-ods btn-sm perm-gestor" data-toggle="modal" data-target="#modalNovoAluno">
+            + Cadastrar Aluno
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTEÚDO -->
+      <main class="dashboard-content">
+        
+        <!-- AVISO DE POLÍTICA DE ACESSO (LGPD) -->
+        <div class="alert alert-light border d-flex align-items-center justify-content-between mb-4" style="border-radius: 12px;">
+          <div class="small">
+            <strong class="text-azul-edtech">Controle de Acesso (LGPD Art. 5º XI):</strong> 
+            <span id="descricaoPermissao">Visão completa de gestão escolar, dados socioeconômicos e estrutura.</span>
+          </div>
+          <span class="badge badge-secondary px-3 py-1" id="badgeRoleAtiva">role_gestor</span>
+        </div>
+
+        <!-- ==========================================
+             ABA 1: ESTUDANTES & SCORE DE RISCO
+             ========================================== -->
+        <div id="aba-estudantes">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <h6 class="font-weight-bold text-secondary mb-0">Registros da Tabela <code class="text-vermelho-ods">Aluno</code> + <code class="text-vermelho-ods">Pessoa</code></h6>
+            <input type="text" id="filtroAluno" class="form-control form-control-sm rounded-pill px-3 mt-2 mt-md-0" style="max-width: 280px;" placeholder="Filtrar por nome ou matrícula..." onkeyup="renderizarTabelas()">
+          </div>
+
+          <div class="table-responsive table-edtech shadow-sm">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Matrícula</th>
+                  <th>Estudante</th>
+                  <th>Turma</th>
+                  <th>Responsável Principal</th>
+                  <th class="col-sensivel">Renda / Vulnerabilidade (LGPD)</th>
+                  <th>Score Risco</th>
+                  <th class="text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyEstudantes">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==========================================
+             ABA 2: AÇÕES PREVENTIVAS (CRUD DEDICADO)
+             ========================================== -->
+        <div id="aba-acoes" style="display: none;">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <div>
+              <h6 class="font-weight-bold text-secondary mb-0">Planos Cadastrados (<code class="text-vermelho-ods">Acao_Preventiva</code>)</h6>
+            </div>
+            <button class="btn btn-pill btn-primario-ods btn-sm perm-intervencao" data-toggle="modal" data-target="#modalNovaAcao">
+              + Registrar Nova Intervenção
+            </button>
+          </div>
+
+          <div class="table-responsive table-edtech shadow-sm">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data Abertura</th>
+                  <th>Estudante (Matrícula)</th>
+                  <th>Tipo de Ação</th>
+                  <th>Descrição do Plano</th>
+                  <th>Status</th>
+                  <th class="text-right perm-intervencao">Gerenciar</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAcoes">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==========================================
+             ABA 3: DIÁRIO (FREQUÊNCIA & DESEMPENHO)
+             ========================================== -->
+        <div id="aba-diario" style="display: none;">
+          <div class="card border-0 shadow-sm p-4" style="border-radius: 16px;">
+            <h5 class="font-weight-bold text-azul-edtech mb-1">Lançamento de Frequência Diária e Notas Bimestrais</h5>
+            <p class="small text-secondary mb-4">Tabelas <code class="text-vermelho-ods">Frequencia</code> e <code class="text-vermelho-ods">Desempenho</code> — Operação principal do perfil Professor.</p>
+            
+            <form onsubmit="event.preventDefault(); alert('Registros de frequência e médias salvos com sucesso!');">
+              <div class="form-row mb-3">
+                <div class="col-md-4">
+                  <label class="small font-weight-bold">Selecionar Turma</label>
+                  <select class="form-control">
+                    <option>2º Ano B - Manhã</option>
+                    <option>1º Ano A - Manhã</option>
+                    <option>9º Ano C - Tarde</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="small font-weight-bold">Data da Chamada</label>
+                  <input type="date" class="form-control" value="2026-11-21">
+                </div>
+                <div class="col-md-4">
+                  <label class="small font-weight-bold">Bimestre de Referência</label>
+                  <select class="form-control">
+                    <option value="1">1º Bimestre</option>
+                    <option value="2">2º Bimestre</option>
+                    <option value="3">3º Bimestre</option>
+                    <option value="4" selected>4º Bimestre</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-responsive border rounded mb-3">
+                <table class="table table-sm mb-0">
+                  <thead class="bg-light">
+                    <tr>
+                      <th class="pl-3">Estudante</th>
+                      <th>Presença Hoje</th>
+                      <th>Justificativa (se falta)</th>
+                      <th style="width: 140px;">Média Bimestral</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbodyDiario">
+                    <!-- Preenchido via JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="text-right">
+                <button type="submit" class="btn btn-pill btn-primario-ods">Salvar Diário da Turma</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 1: CADASTRAR ESTUDANTE + RESPONSÁVEL (1FN, 2FN, 3FN)
+       ========================================================= -->
+  <div class="modal fade" id="modalNovoAluno" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4">
+          <h5 class="modal-title font-weight-bold text-azul-edtech">Cadastro Completo: Estudante & Responsável</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <form id="formNovoAluno" onsubmit="salvarNovoAluno(event)">
+          <div class="modal-body p-4" style="max-height: 75vh; overflow-y: auto;">
+            
+            <!-- BLOCO 1: PESSOA & ENDEREÇO -->
+            <h6 class="font-weight-bold text-vermelho-ods small text-uppercase mb-3">1. Identificação do Estudante (Pessoa & Endereço)</h6>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">CPF do Aluno</label>
+                <input type="text" id="alunoCpf" class="form-control" maxlength="11" placeholder="11 dígitos" required>
+              </div>
+              <div class="form-group col-md-8">
+                <label class="small font-weight-bold">Nome Completo do Estudante</label>
+                <input type="text" id="alunoNome" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Data de Nascimento</label>
+                <input type="date" id="alunoNasc" class="form-control" required>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Gênero</label>
+                <select id="alunoGenero" class="form-control">
+                  <option value="Feminino">Feminino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Raça/Etnia (LGPD)</label>
+                <select id="alunoRaca" class="form-control">
+                  <option value="Parda">Parda</option>
+                  <option value="Preta">Preta</option>
+                  <option value="Branca">Branca</option>
+                  <option value="Indígena">Indígena</option>
+                  <option value="Amarela">Amarela</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-3">
+                <label class="small font-weight-bold">CEP</label>
+                <input type="text" id="alunoCep" class="form-control" maxlength="8" placeholder="24000000" required>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Bairro</label>
+                <input type="text" id="alunoBairro" class="form-control" required>
+              </div>
+              <div class="form-group col-md-5">
+                <label class="small font-weight-bold">Logradouro</label>
+                <input type="text" id="alunoLogradouro" class="form-control" required>
+              </div>
+            </div>
+
+            <!-- BLOCO 2: MATRÍCULA & VULNERABILIDADE -->
+            <hr class="my-3">
+            <h6 class="font-weight-bold text-vermelho-ods small text-uppercase mb-3">2. Dados Escolares & Indicadores (Aluno)</h6>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Matrícula</label>
+                <input type="text" id="alunoMatricula" class="form-control" placeholder="Ex: 20260501" required>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Turma</label>
+                <select id="alunoTurma" class="form-control">
+                  <option value="9º Ano C (Tarde)">9º Ano C (Tarde)</option>
+                  <option value="1º Ano A (Manhã)">1º Ano A (Manhã)</option>
+                  <option value="2º Ano B (Manhã)">2º Ano B (Manhã)</option>
+                </select>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Situação Ocupacional</label>
+                <select id="alunoOcupacao" class="form-control">
+                  <option value="Apenas estuda">Apenas estuda</option>
+                  <option value="Jovem Aprendiz">Jovem Aprendiz</option>
+                  <option value="Trabalho Informal">Trabalho Informal</option>
+                  <option value="Trabalho Formal">Trabalho Formal</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row mb-2">
+              <div class="col-md-4">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="checkFilho">
+                  <label class="custom-control-label small" for="checkFilho">Possui filho(s)</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="checkAcess">
+                  <label class="custom-control-label small" for="checkAcess">Acessibilidade Física</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="checkAcomp">
+                  <label class="custom-control-label small" for="checkAcomp">Acomp. Especializado</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- BLOCO 3: RESPONSÁVEL & PARENTESCO (Para menores de idade) -->
+            <hr class="my-3">
+            <h6 class="font-weight-bold text-vermelho-ods small text-uppercase mb-3">3. Responsável Legal & Contatos (Responsável / Parentesco / Telefone)</h6>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">CPF do Responsável</label>
+                <input type="text" id="respCpf" class="form-control" maxlength="11" required>
+              </div>
+              <div class="form-group col-md-8">
+                <label class="small font-weight-bold">Nome do Responsável</label>
+                <input type="text" id="respNome" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Grau de Parentesco</label>
+                <select id="respParentesco" class="form-control">
+                  <option value="Mãe">Mãe</option>
+                  <option value="Pai">Pai</option>
+                  <option value="Avó/Avô">Avó/Avô</option>
+                  <option value="Outro Responsável">Outro Responsável</option>
+                </select>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Renda Mensal Familiar (R$)</label>
+                <input type="number" step="0.01" id="respRenda" class="form-control" placeholder="Ex: 1412.00" required>
+              </div>
+              <div class="form-group col-md-4">
+                <label class="small font-weight-bold">Escolaridade do Responsável</label>
+                <select id="respEscolaridade" class="form-control">
+                  <option value="Fundamental Incompleto">Fundamental Incompleto</option>
+                  <option value="Fundamental Completo">Fundamental Completo</option>
+                  <option value="Médio Incompleto">Médio Incompleto</option>
+                  <option value="Médio Completo">Médio Completo</option>
+                  <option value="Superior">Superior</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                <label class="small font-weight-bold">Telefone Principal (1FN)</label>
+                <input type="text" id="respTel1" class="form-control" placeholder="(21) 99999-0000" required>
+              </div>
+              <div class="form-group col-md-6 mb-0">
+                <label class="small font-weight-bold">Telefone Secundário (Opcional)</label>
+                <input type="text" id="respTel2" class="form-control" placeholder="(21) 98888-0000">
+              </div>
+            </div>
+
+          </div>
+          <div class="modal-footer border-0 pt-0 pb-4 px-4">
+            <button type="button" class="btn btn-pill btn-secundario-ods" data-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-pill btn-primario-ods">Salvar Cadastro Completo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 2: ABRIR AÇÃO PREVENTIVA
+       ========================================================= -->
+  <div class="modal fade" id="modalNovaAcao" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+        <div class="modal-header border-0 pb-0 pt-4 px-4">
+          <h5 class="modal-title font-weight-bold text-azul-edtech">Registrar Ação Preventiva</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <form onsubmit="salvarNovaAcao(event)">
+          <div class="modal-body p-4">
+            <div class="form-group">
+              <label class="small font-weight-bold">Matrícula do Estudante</label>
+              <input type="text" id="acaoMatricula" class="form-control" placeholder="Ex: 20260104" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label class="small font-weight-bold">Tipo de Ação</label>
+                <select id="acaoTipo" class="form-control" required>
+                  <option value="Contato com Responsável">Contato com Responsável</option>
+                  <option value="Encaminhamento Assistência Social">Encaminhamento Assistência Social</option>
+                  <option value="Reforço Pedagógico">Reforço Pedagógico</option>
+                  <option value="Apoio Psicológico">Apoio Psicológico</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label class="small font-weight-bold">Status</label>
+                <select id="acaoStatus" class="form-control">
+                  <option value="Aberta">Aberta</option>
+                  <option value="Em Andamento">Em Andamento</option>
+                  <option value="Concluída">Concluída</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group mb-0">
+              <label class="small font-weight-bold">Descrição do Plano</label>
+              <textarea id="acaoDescricao" class="form-control" rows="3" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0 pb-4 px-4">
+            <button type="button" class="btn btn-pill btn-secundario-ods" data-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-pill btn-primario-ods">Salvar Intervenção</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+
+  <script>
+    // Dados iniciais de demonstração (substituídos pelo SELECT do MySQL no PHP)
+    const dadosExemploEstudantes = [
+      { matricula: "20260104", nome: "Lucas Ferreira da Silva", bairro: "Fonseca", turma: "2º Ano B (Manhã)", responsavel: "Ana Ferreira (Mãe)", telefone: "(21) 99123-4567", renda: "R$ 1.412,00", ocupacao: "Trabalho Informal", temFilho: false, risco: "Alto", pontos: 86 },
+      { matricula: "20260189", nome: "Mariana Oliveira Santos", bairro: "Centro", turma: "1º Ano A (Manhã)", responsavel: "Cláudia Santos (Mãe)", telefone: "(21) 98765-4321", renda: "R$ 950,00", ocupacao: "Apenas estuda", temFilho: true, risco: "Alto", pontos: 82 },
+      { matricula: "20260302", nome: "Sofia Almeida Rocha", bairro: "Santa Rosa", turma: "2º Ano B (Manhã)", responsavel: "Marcos Rocha (Pai)", telefone: "(21) 99988-7766", renda: "R$ 3.800,00", ocupacao: "Apenas estuda", temFilho: false, risco: "Baixo", pontos: 12 }
+    ];
+
+    const dadosExemploAcoes = [
+      { id: 1, data: "2026-11-18", matricula: "20260104", aluno: "Lucas Ferreira da Silva", tipo: "Contato com Responsável", descricao: "Reunião agendada com a mãe para flexibilizar horário de entrada devido ao trabalho.", status: "Em Andamento" },
+      { id: 2, data: "2026-11-20", matricula: "20260189", aluno: "Mariana Oliveira Santos", tipo: "Encaminhamento Assistência Social", descricao: "Encaminhamento ao CRAS para auxílio creche e acompanhamento familiar.", status: "Aberta" }
+    ];
+
+    let estudantes = [...dadosExemploEstudantes];
+    let acoes = [...dadosExemploAcoes];
+    let modoVazio = false;
+
+    // Inicializa com o perfil escolhido no login.html
+    window.onload = function() {
+      const perfilSalvo = localStorage.getItem('perfilUsuario') || 'gestor';
+      document.getElementById('seletorPerfilRapido').value = perfilSalvo;
+      alterarPerfil(perfilSalvo);
+      renderizarTabelas();
+    };
+
+    // Aplica regras de visibilidade conforme Roles e LGPD da Parte 2
+    function alterarPerfil(perfil) {
+      localStorage.setItem('perfilUsuario', perfil);
+      const badge = document.getElementById('badgeRoleAtiva');
+      const desc = document.getElementById('descricaoPermissao');
+
+      const elemsGestor = document.querySelectorAll('.perm-gestor');
+      const elemsIntervencao = document.querySelectorAll('.perm-intervencao');
+      const colsSensiveis = document.querySelectorAll('.col-sensivel');
+
+      if (perfil === 'gestor') {
+        badge.innerText = 'role_gestor';
+        desc.innerText = 'Acesso administrativo completo: estrutura escolar, cadastros de alunos/responsáveis e intervenções.';
+        elemsGestor.forEach(el => el.style.display = '');
+        elemsIntervencao.forEach(el => el.style.display = '');
+        colsSensiveis.forEach(el => el.style.display = '');
+      } else if (perfil === 'assistente') {
+        badge.innerText = 'role_assistente_social';
+        desc.innerText = 'Foco em vulnerabilidade social e gestão de Ações Preventivas (sem edição de cadastro escolar).';
+        elemsGestor.forEach(el => el.style.display = 'none');
+        elemsIntervencao.forEach(el => el.style.display = '');
+        colsSensiveis.forEach(el => el.style.display = '');
+      } else if (perfil === 'professor') {
+        badge.innerText = 'role_professor';
+        desc.innerText = 'Acesso restrito (LGPD): dados sensíveis como Renda e Raça/Etnia estão ocultos. Foco em Diário e Chamada.';
+        elemsGestor.forEach(el => el.style.display = 'none');
+        elemsIntervencao.forEach(el => el.style.display = 'none');
+        colsSensiveis.forEach(el => el.style.display = 'none');
+      }
+      renderizarTabelas();
+    }
+
+    function trocarAba(aba, linkEl) {
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      linkEl.classList.add('active');
+
+      document.getElementById('aba-estudantes').style.display = aba === 'estudantes' ? 'block' : 'none';
+      document.getElementById('aba-acoes').style.display = aba === 'acoes' ? 'block' : 'none';
+      document.getElementById('aba-diario').style.display = aba === 'diario' ? 'block' : 'none';
+
+      const titulos = {
+        estudantes: 'Monitoramento de Estudantes',
+        acoes: 'Gestão de Ações Preventivas',
+        diario: 'Diário de Classe (Frequência & Notas)'
+      };
+      document.getElementById('tituloPagina').innerText = titulos[aba];
+    }
+
+    function alternarEstadoDados() {
+      modoVazio = !modoVazio;
+      const btn = document.getElementById('btnToggleDados');
+      if (modoVazio) {
+        estudantes = [];
+        acoes = [];
+        btn.innerText = 'Carregar Dados de Teste';
+      } else {
+        estudantes = [...dadosExemploEstudantes];
+        acoes = [...dadosExemploAcoes];
+        btn.innerText = 'Simular Banco Vazio';
+      }
+      renderizarTabelas();
+    }
+
+    function renderizarTabelas() {
+      const perfil = localStorage.getItem('perfilUsuario') || 'gestor';
+      const filtro = (document.getElementById('filtroAluno').value || '').toLowerCase();
+      const tbodyEst = document.getElementById('tbodyEstudantes');
+      const tbodyAc = document.getElementById('tbodyAcoes');
+      const tbodyDiario = document.getElementById('tbodyDiario');
+
+      // 1. Renderiza Estudantes
+      const filtrados = estudantes.filter(e => e.nome.toLowerCase().includes(filtro) || e.matricula.includes(filtro));
+      if (filtrados.length === 0) {
+        tbodyEst.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">Nenhum estudante cadastrado nesta instituição ainda.</td></tr>`;
+      } else {
+        tbodyEst.innerHTML = filtrados.map(e => {
+          const badgeClass = e.risco === 'Alto' ? 'badge-risco-alto' : (e.risco === 'Médio' ? 'badge-risco-medio' : 'badge-risco-baixo');
+          const ocultoLgpd = perfil === 'professor' ? 'style="display:none;"' : '';
+          const btnIntervir = perfil !== 'professor' ? `<button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="abrirModalIntervencao('${e.matricula}')">Intervir</button>` : '';
+          const btnExcluir = perfil === 'gestor' ? `<button class="btn btn-sm btn-outline-danger rounded-pill ml-1" onclick="removerEstudante('${e.matricula}')">&times;</button>` : '';
+
+          return `
+            <tr>
+              <td class="font-weight-bold text-secondary">${e.matricula}</td>
+              <td>
+                <div class="font-weight-bold text-dark">${e.nome}</div>
+                <small class="text-muted">Bairro: ${e.bairro}</small>
+              </td>
+              <td>${e.turma}</td>
+              <td>
+                <div class="small font-weight-bold">${e.responsavel}</div>
+                <small class="text-muted">${e.telefone}</small>
+              </td>
+              <td class="col-sensivel" ${ocultoLgpd}>
+                <div class="small font-weight-bold">${e.renda}</div>
+                <span class="badge badge-light border">${e.ocupacao}</span>
+                ${e.temFilho ? '<span class="badge badge-light border">Tem filho(s)</span>' : ''}
+              </td>
+              <td><span class="${badgeClass}">${e.risco} (${e.pontos} pts)</span></td>
+              <td class="text-right">${btnIntervir} ${btnExcluir}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 2. Renderiza Ações Preventivas
+      document.getElementById('contadorAcoesBadge').innerText = acoes.length;
+      if (acoes.length === 0) {
+        tbodyAc.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">Nenhuma ação preventiva registrada até o momento.</td></tr>`;
+      } else {
+        tbodyAc.innerHTML = acoes.map(a => {
+          const badgeStatus = a.status === 'Concluída' ? 'badge-success' : (a.status === 'Em Andamento' ? 'badge-warning' : 'badge-danger');
+          const btnGerenciar = perfil !== 'professor' ? `
+            <td class="text-right">
+              <button class="btn btn-sm btn-outline-success rounded-pill" onclick="concluirAcao(${a.id})">Concluir</button>
+              <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="removerAcao(${a.id})">&times;</button>
+            </td>` : '';
+          return `
+            <tr>
+              <td class="font-weight-bold">#${a.id}</td>
+              <td>${a.data}</td>
+              <td><strong>${a.aluno}</strong><br><small class="text-muted">Mat: ${a.matricula}</small></td>
+              <td>${a.tipo}</td>
+              <td class="small" style="max-width: 280px;">${a.descricao}</td>
+              <td><span class="badge ${badgeStatus} px-2 py-1">${a.status}</span></td>
+              ${btnGerenciar}
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 3. Renderiza Diário
+      if (estudantes.length === 0) {
+        tbodyDiario.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">Sem alunos vinculados à turma.</td></tr>`;
+      } else {
+        tbodyDiario.innerHTML = estudantes.map(e => `
+          <tr>
+            <td class="pl-3 align-middle"><strong>${e.nome}</strong> <small class="text-muted">(${e.matricula})</small></td>
+            <td class="align-middle">
+              <select class="form-control form-control-sm" style="width: 110px;">
+                <option value="1">Presente</option>
+                <option value="0">Falta</option>
+              </select>
+            </td>
+            <td class="align-middle"><input type="text" class="form-control form-control-sm" placeholder="Opcional..."></td>
+            <td class="align-middle"><input type="number" step="0.1" min="0" max="10" class="form-control form-control-sm" placeholder="0.0 - 10.0"></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function salvarNovoAluno(e) {
+      e.preventDefault();
+      const ocupacao = document.getElementById('alunoOcupacao').value;
+      const temFilho = document.getElementById('checkFilho').checked;
+      let pontos = 15;
+      if (ocupacao !== 'Apenas estuda') pontos += 35;
+      if (temFilho) pontos += 40;
+      const risco = pontos >= 70 ? 'Alto' : (pontos >= 40 ? 'Médio' : 'Baixo');
+
+      estudantes.unshift({
+        matricula: document.getElementById('alunoMatricula').value,
+        nome: document.getElementById('alunoNome').value,
+        bairro: document.getElementById('alunoBairro').value,
+        turma: document.getElementById('alunoTurma').value,
+        responsavel: `${document.getElementById('respNome').value} (${document.getElementById('respParentesco').value})`,
+        telefone: document.getElementById('respTel1').value,
+        renda: `R$ ${parseFloat(document.getElementById('respRenda').value).toFixed(2)}`,
+        ocupacao: ocupacao,
+        temFilho: temFilho,
+        risco: risco,
+        pontos: pontos
+      });
+
+      $('#modalNovoAluno').modal('hide');
+      e.target.reset();
+      renderizarTabelas();
+    }
+
+    function abrirModalIntervencao(matricula) {
+      document.getElementById('acaoMatricula').value = matricula;
+      $('#modalNovaAcao').modal('show');
+    }
+
+    function salvarNovaAcao(e) {
+      e.preventDefault();
+      const mat = document.getElementById('acaoMatricula').value;
+      const est = estudantes.find(x => x.matricula === mat);
+      acoes.unshift({
+        id: acoes.length + 1,
+        data: new Date().toISOString().split('T')[0],
+        matricula: mat,
+        aluno: est ? est.nome : 'Estudante Vinculado',
+        tipo: document.getElementById('acaoTipo').value,
+        descricao: document.getElementById('acaoDescricao').value,
+        status: document.getElementById('acaoStatus').value
+      });
+      $('#modalNovaAcao').modal('hide');
+      e.target.reset();
+      renderizarTabelas();
+    }
+
+    function concluirAcao(id) {
+      const acao = acoes.find(a => a.id === id);
+      if (acao) acao.status = 'Concluída';
+      renderizarTabelas();
+    }
+
+    function removerAcao(id) {
+      if (confirm('Excluir esta ação preventiva?')) {
+        acoes = acoes.filter(a => a.id !== id);
+        renderizarTabelas();
+      }
+    }
+
+    function removerEstudante(mat) {
+      if (confirm('Inativar/remover este estudante?')) {
+        estudantes = estudantes.filter(e => e.matricula !== mat);
+        renderizarTabelas();
+      }
+    }
+  </script>
+</body>
+</html>
