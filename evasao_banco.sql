@@ -1,4 +1,4 @@
-
+SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS Acao_Preventiva;
@@ -19,7 +19,7 @@ CREATE TABLE Endereco (
     CEP CHAR(8) PRIMARY KEY,
     Bairro VARCHAR(100),
     Logradouro VARCHAR(150)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Pessoa (
     CPF CHAR(11) PRIMARY KEY,
@@ -31,7 +31,7 @@ CREATE TABLE Pessoa (
     Estado_Civil VARCHAR(30),
     Naturalidade VARCHAR(100),
     FOREIGN KEY (CEP) REFERENCES Endereco (CEP)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Escola (
     ID_INEP VARCHAR(20) PRIMARY KEY,
@@ -40,7 +40,7 @@ CREATE TABLE Escola (
     Tel_Escola VARCHAR(20),
     Possui_Acessibilidade_Fisica BOOLEAN,
     Possui_Atendimento_Especializado BOOLEAN
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Turma (
     ID_Turma INT AUTO_INCREMENT PRIMARY KEY,
@@ -49,7 +49,7 @@ CREATE TABLE Turma (
     Ano_Letivo INT,
     ID_INEP VARCHAR(20),
     FOREIGN KEY (ID_INEP) REFERENCES Escola (ID_INEP)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Aluno (
     Matricula VARCHAR(30) PRIMARY KEY,
@@ -63,7 +63,7 @@ CREATE TABLE Aluno (
     ID_Turma INT,
     FOREIGN KEY (CPF) REFERENCES Pessoa (CPF),
     FOREIGN KEY (ID_Turma) REFERENCES Turma (ID_Turma)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE Responsavel (
@@ -71,7 +71,7 @@ CREATE TABLE Responsavel (
     Renda_Mensal DECIMAL(10, 2),
     Escolaridade VARCHAR(50),
     FOREIGN KEY (CPF) REFERENCES Pessoa (CPF)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE Telefone_Responsavel (
@@ -79,7 +79,7 @@ CREATE TABLE Telefone_Responsavel (
     Telefone VARCHAR(20),
     PRIMARY KEY (CPF_Responsavel, Telefone),
     FOREIGN KEY (CPF_Responsavel) REFERENCES Responsavel (CPF) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Parentesco (
     Matricula VARCHAR(30),
@@ -89,7 +89,7 @@ CREATE TABLE Parentesco (
     PRIMARY KEY (Matricula, CPF_Responsavel, Grau_Parentesco),
     FOREIGN KEY (Matricula) REFERENCES Aluno (Matricula),
     FOREIGN KEY (CPF_Responsavel) REFERENCES Responsavel (CPF)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Desempenho (
     ID_Turma INT,
@@ -99,7 +99,7 @@ CREATE TABLE Desempenho (
     PRIMARY KEY (ID_Turma, Matricula, Bimestre),
     FOREIGN KEY (ID_Turma) REFERENCES Turma (ID_Turma),
     FOREIGN KEY (Matricula) REFERENCES Aluno (Matricula)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Frequencia (
     ID_Turma INT,
@@ -110,7 +110,7 @@ CREATE TABLE Frequencia (
     PRIMARY KEY (ID_Turma, Matricula, Data),
     FOREIGN KEY (ID_Turma) REFERENCES Turma (ID_Turma),
     FOREIGN KEY (Matricula) REFERENCES Aluno (Matricula)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE Acao_Preventiva (
     ID_Acao INT AUTO_INCREMENT PRIMARY KEY,
@@ -120,7 +120,7 @@ CREATE TABLE Acao_Preventiva (
     Status_Acao VARCHAR(30),
     Matricula VARCHAR(30),
     FOREIGN KEY (Matricula) REFERENCES Aluno (Matricula)
-);
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 INSERT INTO Endereco (CEP, Bairro, Logradouro) VALUES
