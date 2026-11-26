@@ -63,7 +63,7 @@
       <header class="topbar-edtech d-flex flex-wrap justify-content-between align-items-center">
         <div>
           <h5 class="font-weight-bold mb-0" id="tituloPagina">Monitoramento de Estudantes</h5>
-          <small class="text-muted">Instituição vinculada ao usuário logado (via PHP/MySQL)</small>
+          <small class="text-muted">Instituição vinculada ao usuário logado</small>
         </div>
 
         <div class="d-flex align-items-center mt-2 mt-md-0">
@@ -265,8 +265,9 @@
             <div class="form-row">
               <div class="form-group col-md-3">
                 <label class="small font-weight-bold">CEP</label>
-                <input type="text" id="alunoCep" class="form-control" maxlength="8" placeholder="24000000" required>
-              </div>
+                <input type="text" id="alunoCep" class="form-control" maxlength="8" placeholder="24000000" onblur="buscarCEP(this.value)" required>
+                <small id="statusCep"></small>
+                </div>
               <div class="form-group col-md-4">
                 <label class="small font-weight-bold">Bairro</label>
                 <input type="text" id="alunoBairro" class="form-control" required>
@@ -288,14 +289,15 @@
               <div class="form-group col-md-4">
                 <label class="small font-weight-bold">Turma</label>
                 <select id="alunoTurma" class="form-control">
-                  <option value="9º Ano C (Tarde)">9º Ano C (Tarde)</option>
-                  <option value="1º Ano A (Manhã)">1º Ano A (Manhã)</option>
-                  <option value="2º Ano B (Manhã)">2º Ano B (Manhã)</option>
+                    <option value="201">9º Ano A - Manhã (Colégio Nilthon Baltazar)</option>
+                    <option value="202">1º Ano Médio B - Tarde (Colégio Nilthon Baltazar)</option>
+                    <option value="101">9º Ano A - Manhã (Instituto Alfa)</option>
+                    <option value="102">1º Ano Médio B - Tarde (Instituto Alfa)</option>
                 </select>
               </div>
               <div class="form-group col-md-4">
                 <label class="small font-weight-bold">Situação Ocupacional</label>
-                <select id="alunoOcupacao" class="form-control">
+                <select id="alunoOcupacao" class="form-control" onchange="calcularScorePreview()">
                   <option value="Apenas estuda">Apenas estuda</option>
                   <option value="Jovem Aprendiz">Jovem Aprendiz</option>
                   <option value="Trabalho Informal">Trabalho Informal</option>
@@ -307,19 +309,19 @@
             <div class="form-row mb-2">
               <div class="col-md-4">
                 <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="checkFilho">
+                  <input type="checkbox" class="custom-control-input" id="checkFilho" onchange="calcularScorePreview()">
                   <label class="custom-control-label small" for="checkFilho">Possui filho(s)</label>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="checkAcess">
+                  <input type="checkbox" class="custom-control-input" id="checkAcess" onchange="calcularScorePreview()">
                   <label class="custom-control-label small" for="checkAcess">Acessibilidade Física</label>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="checkAcomp">
+                  <input type="checkbox" class="custom-control-input" id="checkAcomp" onchange="calcularScorePreview()">
                   <label class="custom-control-label small" for="checkAcomp">Acomp. Especializado</label>
                 </div>
               </div>
@@ -351,7 +353,7 @@
               </div>
               <div class="form-group col-md-4">
                 <label class="small font-weight-bold">Renda Mensal Familiar (R$)</label>
-                <input type="number" step="0.01" id="respRenda" class="form-control" placeholder="Ex: 1412.00" required>
+                <input type="number" step="0.01" id="respRenda" class="form-control" placeholder="Ex: 1412.00" oninput="calcularScorePreview()" required>
               </div>
               <div class="form-group col-md-4">
                 <label class="small font-weight-bold">Escolaridade do Responsável</label>
@@ -373,6 +375,17 @@
               <div class="form-group col-md-6 mb-0">
                 <label class="small font-weight-bold">Telefone Secundário (Opcional)</label>
                 <input type="text" id="respTel2" class="form-control" placeholder="(21) 98888-0000">
+              </div>
+            </div>
+
+            <!-- BARRA DE PRÉVIA DO SCORE DE RISCO EM TEMPO REAL -->
+            <div class="p-3 bg-light rounded border mt-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small font-weight-bold text-azul-edtech">Prévia do Score de Risco:</span>
+                <span id="textoScorePreview" class="small font-weight-bold text-success">Risco Baixo (10 pts)</span>
+              </div>
+              <div class="progress" style="height: 8px; border-radius: 50px;">
+                <div id="barraScorePreview" class="progress-bar bg-success" style="width: 10%;"></div>
               </div>
             </div>
 
@@ -438,253 +451,6 @@
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
-
-  <script>
-    // Dados iniciais de demonstração (substituídos pelo SELECT do MySQL no PHP)
-    const dadosExemploEstudantes = [
-      { matricula: "20260104", nome: "Lucas Ferreira da Silva", bairro: "Fonseca", turma: "2º Ano B (Manhã)", responsavel: "Ana Ferreira (Mãe)", telefone: "(21) 99123-4567", renda: "R$ 1.412,00", ocupacao: "Trabalho Informal", temFilho: false, risco: "Alto", pontos: 86 },
-      { matricula: "20260189", nome: "Mariana Oliveira Santos", bairro: "Centro", turma: "1º Ano A (Manhã)", responsavel: "Cláudia Santos (Mãe)", telefone: "(21) 98765-4321", renda: "R$ 950,00", ocupacao: "Apenas estuda", temFilho: true, risco: "Alto", pontos: 82 },
-      { matricula: "20260302", nome: "Sofia Almeida Rocha", bairro: "Santa Rosa", turma: "2º Ano B (Manhã)", responsavel: "Marcos Rocha (Pai)", telefone: "(21) 99988-7766", renda: "R$ 3.800,00", ocupacao: "Apenas estuda", temFilho: false, risco: "Baixo", pontos: 12 }
-    ];
-
-    const dadosExemploAcoes = [
-      { id: 1, data: "2026-11-18", matricula: "20260104", aluno: "Lucas Ferreira da Silva", tipo: "Contato com Responsável", descricao: "Reunião agendada com a mãe para flexibilizar horário de entrada devido ao trabalho.", status: "Em Andamento" },
-      { id: 2, data: "2026-11-20", matricula: "20260189", aluno: "Mariana Oliveira Santos", tipo: "Encaminhamento Assistência Social", descricao: "Encaminhamento ao CRAS para auxílio creche e acompanhamento familiar.", status: "Aberta" }
-    ];
-
-    let estudantes = [...dadosExemploEstudantes];
-    let acoes = [...dadosExemploAcoes];
-    let modoVazio = false;
-
-    // Inicializa com o perfil escolhido no login.html
-    window.onload = function() {
-      const perfilSalvo = localStorage.getItem('perfilUsuario') || 'gestor';
-      document.getElementById('seletorPerfilRapido').value = perfilSalvo;
-      alterarPerfil(perfilSalvo);
-      renderizarTabelas();
-    };
-
-    // Aplica regras de visibilidade conforme Roles e LGPD da Parte 2
-    function alterarPerfil(perfil) {
-      localStorage.setItem('perfilUsuario', perfil);
-      const badge = document.getElementById('badgeRoleAtiva');
-      const desc = document.getElementById('descricaoPermissao');
-
-      const elemsGestor = document.querySelectorAll('.perm-gestor');
-      const elemsIntervencao = document.querySelectorAll('.perm-intervencao');
-      const colsSensiveis = document.querySelectorAll('.col-sensivel');
-
-      if (perfil === 'gestor') {
-        badge.innerText = 'role_gestor';
-        desc.innerText = 'Acesso administrativo completo: estrutura escolar, cadastros de alunos/responsáveis e intervenções.';
-        elemsGestor.forEach(el => el.style.display = '');
-        elemsIntervencao.forEach(el => el.style.display = '');
-        colsSensiveis.forEach(el => el.style.display = '');
-      } else if (perfil === 'assistente') {
-        badge.innerText = 'role_assistente_social';
-        desc.innerText = 'Foco em vulnerabilidade social e gestão de Ações Preventivas (sem edição de cadastro escolar).';
-        elemsGestor.forEach(el => el.style.display = 'none');
-        elemsIntervencao.forEach(el => el.style.display = '');
-        colsSensiveis.forEach(el => el.style.display = '');
-      } else if (perfil === 'professor') {
-        badge.innerText = 'role_professor';
-        desc.innerText = 'Acesso restrito (LGPD): dados sensíveis como Renda e Raça/Etnia estão ocultos. Foco em Diário e Chamada.';
-        elemsGestor.forEach(el => el.style.display = 'none');
-        elemsIntervencao.forEach(el => el.style.display = 'none');
-        colsSensiveis.forEach(el => el.style.display = 'none');
-      }
-      renderizarTabelas();
-    }
-
-    function trocarAba(aba, linkEl) {
-      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-      linkEl.classList.add('active');
-
-      document.getElementById('aba-estudantes').style.display = aba === 'estudantes' ? 'block' : 'none';
-      document.getElementById('aba-acoes').style.display = aba === 'acoes' ? 'block' : 'none';
-      document.getElementById('aba-diario').style.display = aba === 'diario' ? 'block' : 'none';
-
-      const titulos = {
-        estudantes: 'Monitoramento de Estudantes',
-        acoes: 'Gestão de Ações Preventivas',
-        diario: 'Diário de Classe (Frequência & Notas)'
-      };
-      document.getElementById('tituloPagina').innerText = titulos[aba];
-    }
-
-    function alternarEstadoDados() {
-      modoVazio = !modoVazio;
-      const btn = document.getElementById('btnToggleDados');
-      if (modoVazio) {
-        estudantes = [];
-        acoes = [];
-        btn.innerText = 'Carregar Dados de Teste';
-      } else {
-        estudantes = [...dadosExemploEstudantes];
-        acoes = [...dadosExemploAcoes];
-        btn.innerText = 'Simular Banco Vazio';
-      }
-      renderizarTabelas();
-    }
-
-    function renderizarTabelas() {
-      const perfil = localStorage.getItem('perfilUsuario') || 'gestor';
-      const filtro = (document.getElementById('filtroAluno').value || '').toLowerCase();
-      const tbodyEst = document.getElementById('tbodyEstudantes');
-      const tbodyAc = document.getElementById('tbodyAcoes');
-      const tbodyDiario = document.getElementById('tbodyDiario');
-
-      // 1. Renderiza Estudantes
-      const filtrados = estudantes.filter(e => e.nome.toLowerCase().includes(filtro) || e.matricula.includes(filtro));
-      if (filtrados.length === 0) {
-        tbodyEst.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">Nenhum estudante cadastrado nesta instituição ainda.</td></tr>`;
-      } else {
-        tbodyEst.innerHTML = filtrados.map(e => {
-          const badgeClass = e.risco === 'Alto' ? 'badge-risco-alto' : (e.risco === 'Médio' ? 'badge-risco-medio' : 'badge-risco-baixo');
-          const ocultoLgpd = perfil === 'professor' ? 'style="display:none;"' : '';
-          const btnIntervir = perfil !== 'professor' ? `<button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="abrirModalIntervencao('${e.matricula}')">Intervir</button>` : '';
-          const btnExcluir = perfil === 'gestor' ? `<button class="btn btn-sm btn-outline-danger rounded-pill ml-1" onclick="removerEstudante('${e.matricula}')">&times;</button>` : '';
-
-          return `
-            <tr>
-              <td class="font-weight-bold text-secondary">${e.matricula}</td>
-              <td>
-                <div class="font-weight-bold text-dark">${e.nome}</div>
-                <small class="text-muted">Bairro: ${e.bairro}</small>
-              </td>
-              <td>${e.turma}</td>
-              <td>
-                <div class="small font-weight-bold">${e.responsavel}</div>
-                <small class="text-muted">${e.telefone}</small>
-              </td>
-              <td class="col-sensivel" ${ocultoLgpd}>
-                <div class="small font-weight-bold">${e.renda}</div>
-                <span class="badge badge-light border">${e.ocupacao}</span>
-                ${e.temFilho ? '<span class="badge badge-light border">Tem filho(s)</span>' : ''}
-              </td>
-              <td><span class="${badgeClass}">${e.risco} (${e.pontos} pts)</span></td>
-              <td class="text-right">${btnIntervir} ${btnExcluir}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      // 2. Renderiza Ações Preventivas
-      document.getElementById('contadorAcoesBadge').innerText = acoes.length;
-      if (acoes.length === 0) {
-        tbodyAc.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">Nenhuma ação preventiva registrada até o momento.</td></tr>`;
-      } else {
-        tbodyAc.innerHTML = acoes.map(a => {
-          const badgeStatus = a.status === 'Concluída' ? 'badge-success' : (a.status === 'Em Andamento' ? 'badge-warning' : 'badge-danger');
-          const btnGerenciar = perfil !== 'professor' ? `
-            <td class="text-right">
-              <button class="btn btn-sm btn-outline-success rounded-pill" onclick="concluirAcao(${a.id})">Concluir</button>
-              <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="removerAcao(${a.id})">&times;</button>
-            </td>` : '';
-          return `
-            <tr>
-              <td class="font-weight-bold">#${a.id}</td>
-              <td>${a.data}</td>
-              <td><strong>${a.aluno}</strong><br><small class="text-muted">Mat: ${a.matricula}</small></td>
-              <td>${a.tipo}</td>
-              <td class="small" style="max-width: 280px;">${a.descricao}</td>
-              <td><span class="badge ${badgeStatus} px-2 py-1">${a.status}</span></td>
-              ${btnGerenciar}
-            </tr>
-          `;
-        }).join('');
-      }
-
-      // 3. Renderiza Diário
-      if (estudantes.length === 0) {
-        tbodyDiario.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">Sem alunos vinculados à turma.</td></tr>`;
-      } else {
-        tbodyDiario.innerHTML = estudantes.map(e => `
-          <tr>
-            <td class="pl-3 align-middle"><strong>${e.nome}</strong> <small class="text-muted">(${e.matricula})</small></td>
-            <td class="align-middle">
-              <select class="form-control form-control-sm" style="width: 110px;">
-                <option value="1">Presente</option>
-                <option value="0">Falta</option>
-              </select>
-            </td>
-            <td class="align-middle"><input type="text" class="form-control form-control-sm" placeholder="Opcional..."></td>
-            <td class="align-middle"><input type="number" step="0.1" min="0" max="10" class="form-control form-control-sm" placeholder="0.0 - 10.0"></td>
-          </tr>
-        `).join('');
-      }
-    }
-
-    function salvarNovoAluno(e) {
-      e.preventDefault();
-      const ocupacao = document.getElementById('alunoOcupacao').value;
-      const temFilho = document.getElementById('checkFilho').checked;
-      let pontos = 15;
-      if (ocupacao !== 'Apenas estuda') pontos += 35;
-      if (temFilho) pontos += 40;
-      const risco = pontos >= 70 ? 'Alto' : (pontos >= 40 ? 'Médio' : 'Baixo');
-
-      estudantes.unshift({
-        matricula: document.getElementById('alunoMatricula').value,
-        nome: document.getElementById('alunoNome').value,
-        bairro: document.getElementById('alunoBairro').value,
-        turma: document.getElementById('alunoTurma').value,
-        responsavel: `${document.getElementById('respNome').value} (${document.getElementById('respParentesco').value})`,
-        telefone: document.getElementById('respTel1').value,
-        renda: `R$ ${parseFloat(document.getElementById('respRenda').value).toFixed(2)}`,
-        ocupacao: ocupacao,
-        temFilho: temFilho,
-        risco: risco,
-        pontos: pontos
-      });
-
-      $('#modalNovoAluno').modal('hide');
-      e.target.reset();
-      renderizarTabelas();
-    }
-
-    function abrirModalIntervencao(matricula) {
-      document.getElementById('acaoMatricula').value = matricula;
-      $('#modalNovaAcao').modal('show');
-    }
-
-    function salvarNovaAcao(e) {
-      e.preventDefault();
-      const mat = document.getElementById('acaoMatricula').value;
-      const est = estudantes.find(x => x.matricula === mat);
-      acoes.unshift({
-        id: acoes.length + 1,
-        data: new Date().toISOString().split('T')[0],
-        matricula: mat,
-        aluno: est ? est.nome : 'Estudante Vinculado',
-        tipo: document.getElementById('acaoTipo').value,
-        descricao: document.getElementById('acaoDescricao').value,
-        status: document.getElementById('acaoStatus').value
-      });
-      $('#modalNovaAcao').modal('hide');
-      e.target.reset();
-      renderizarTabelas();
-    }
-
-    function concluirAcao(id) {
-      const acao = acoes.find(a => a.id === id);
-      if (acao) acao.status = 'Concluída';
-      renderizarTabelas();
-    }
-
-    function removerAcao(id) {
-      if (confirm('Excluir esta ação preventiva?')) {
-        acoes = acoes.filter(a => a.id !== id);
-        renderizarTabelas();
-      }
-    }
-
-    function removerEstudante(mat) {
-      if (confirm('Inativar/remover este estudante?')) {
-        estudantes = estudantes.filter(e => e.matricula !== mat);
-        renderizarTabelas();
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
